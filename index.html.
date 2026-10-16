@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS | העוזר האישי שלי</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at center,#102b45,#030812 70%);color:#b9f6ff;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;padding:20px}
+main{width:100%;max-width:600px;text-align:center;border:1px solid #1c9dbb;border-radius:25px;padding:28px 20px;box-shadow:0 0 35px #087a9944;background:#06111de8}
+h1{letter-spacing:7px;font-size:38px;margin:8px}
+.sub{color:#6db4c8}
+.orb{width:155px;height:155px;border:3px solid #63eaff;border-radius:50%;margin:28px auto;display:grid;place-items:center;box-shadow:0 0 25px #00d9ff,inset 0 0 25px #00d9ff55;animation:pulse 2s infinite}
+.orb span{font-size:48px}
+@keyframes pulse{50%{box-shadow:0 0 45px #00d9ff,inset 0 0 35px #00d9ff88}}
+button{background:#0b3548;color:#c9faff;border:1px solid #45dff5;padding:13px 17px;border-radius:12px;font-size:16px;margin:5px;cursor:pointer}
+button:hover{background:#14536a}
+#status{min-height:26px;color:#78e8fa;margin:16px}
+#answer{white-space:pre-wrap;line-height:1.7;background:#091c2a;border-radius:12px;padding:15px;min-height:60px}
+input{width:100%;padding:14px;border-radius:10px;border:1px solid #248ba3;background:#020b13;color:white;font-size:16px;margin-top:12px}
+small{color:#6e9ba8;display:block;margin-top:20px}
+</style>
+</head>
+<body>
+<main>
+  <p class="sub">PERSONAL AI ASSISTANT</p>
+  <h1>J.A.R.V.I.S.</h1>
+  <p class="sub">העוזר האישי שלך</p>
+  <div class="orb"><span>◈</span></div>
+  <div id="status">המערכת מוכנה לפעולה</div>
+  <button onclick="listen()">🎙️ דברי עם ג׳רוויס</button>
+  <button onclick="say('שלום! אני ג׳רוויס, העוזר האישי שלך. איך אוכל לעזור?')">🔊 בדיקת קול</button>
+  <div id="answer">שלום! אני ג׳רוויס. לחצי על המיקרופון או כתבי לי הודעה.</div>
+  <input id="msg" placeholder="כתבי פקודה לג׳רוויס..." onkeydown="if(event.key==='Enter') send()">
+  <button onclick="send()">שליחה ↵</button>
+  <small>JARVIS PERSONAL SYSTEM · גרסה 1.0</small>
+</main>
+<script>
+const statusEl=document.getElementById('status');
+const answerEl=document.getElementById('answer');
+function say(text){
+  if(!('speechSynthesis' in window)){statusEl.textContent='הדפדפן לא תומך בהשמעת קול';return}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='he-IL';
+  speechSynthesis.speak(u);
+}
+function respond(text){
+  const t=text.toLowerCase().trim();
+  let a='';
+  if(t.includes('שלום')||t.includes('היי')||t.includes('הי')) a='שלום! אני כאן ומוכנה לעזור לך.';
+  else if(t.includes('שמך')||t.includes('מי אתה')||t.includes('מי את')) a='אני ג׳רוויס, העוזר האישי שלך.';
+  else if(t.includes('שעה')) a='השעה כרגע '+new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})+'.';
+  else if(t.includes('תאריך')||t.includes('היום')) a='היום '+new Date().toLocaleDateString('he-IL')+'.';
+  else if(t.includes('פתחי יוטיוב')||t.includes('פתח יוטיוב')||t.includes('יוטיוב')){a='פותחת את YouTube בחלון חדש.';window.open('https://www.youtube.com/','_blank');}
+  else if(t.includes('פתחי גוגל')||t.includes('פתח גוגל')||t.includes('גוגל')){a='פותחת את Google בחלון חדש.';window.open('https://www.google.com/','_blank');}
+  else if(t.includes('תודה')) a='בשמחה! אני כאן בשבילך.';
+  else if(t.includes('עזרה')) a='את יכולה לשאול מה השעה, מה התאריך, להגיד שלום או לבקש לפתוח את גוגל או יוטיוב.';
+  else a='עדיין לא למדתי לענות על כל שאלה, אבל אפשר להוסיף לי עוד פקודות בהמשך.';
+  answerEl.textContent=a;
+  statusEl.textContent='הפקודה עובדה';
+  say(a);
+}
+function send(){
+  const input=document.getElementById('msg');
+  if(!input.value.trim())return;
+  respond(input.value);
+  input.value='';
+}
+function listen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){statusEl.textContent='הזיהוי הקולי לא נתמך בדפדפן הזה. נסי Chrome.';return}
+  const r=new SR();
+  r.lang='he-IL';
+  r.onstart=()=>statusEl.textContent='מקשיבה לך...';
+  r.onresult=e=>respond(e.results[0][0].transcript);
+  r.onerror=()=>statusEl.textContent='לא הצלחתי לשמוע. בדקי הרשאת מיקרופון ונסי שוב.';
+  r.onend=()=>{if(statusEl.textContent==='מקשיבה לך...')statusEl.textContent='ההאזנה הסתיימה';};
+  r.start();
+}
+</script>
+</body>
+</html>
